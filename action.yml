@@ -4,29 +4,17 @@ branding:
   colour: green
 description: 'Sends a request to GitHub in order to track deployment'
 inputs:
-  ref:
-    description: 'Branch to be deployed'
-    required: true
-  sha:
-    description: 'Commit sha to be deployed'
-    required: true
   environment:
-    description: 'Environment the deploy will happen in'
+    description: 'Deployment environment'
     required: true
   preview_url:
     description: 'Preview URL'
-  creator:
-    description: 'The creator of the commit to be deployed'
-    required: true
   description:
-    description: 'Description of the deploy'
+    description: 'Deployment description'
     default: ''
   token:
     description: 'GitHub token'
     required: true
-  error:
-    description: 'Any errors during deployment: INSTALL, BUILD, PUBLISH'
-    default: ''
 
 runs:
   using: 'node12'
