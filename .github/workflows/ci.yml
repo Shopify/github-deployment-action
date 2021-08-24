@@ -1,0 +1,34 @@
+name: CI
+on: [push]
+jobs:
+  success:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Fake Successful Deploy
+        id: deploy
+        run: echo "::set-output name=preview_url::https://shopify.dev/hydrogen"
+      - name: Create GitHub Deployment
+        id: github-deployment-action
+        uses: ./
+        with:
+          token: ${{ github.token }}
+          environment: 'preview'
+          preview_url: ${{ steps.deploy.outputs.preview_url }}
+          description: ${{ github.event.head_commit.message }}
+
+  error:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Fake Errored Deploy
+        id: deploy
+        run: echo "ERROR!!" 1>&2
+      - name: Create GitHub Deployment
+        id: github-deployment-action
+        uses: ./
+        with:
+          token: ${{ github.token }}
+          environment: 'preview'
+          preview_url: ${{ steps.deploy.outputs.preview_url }}
+          description: ${{ github.event.head_commit.message }}
