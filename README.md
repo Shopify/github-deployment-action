@@ -4,7 +4,7 @@
 
 ## About this repo
 
-Create [GitHub deployments](GitHub deployments) from GitHub actions.
+Create [GitHub deployments](https://docs.github.com/en/rest/reference/repos#deployments) from GitHub actions.
 
 Omit the `preview_url` and the deployment is assumed to be a failure. When this happen, the GitHub workflow run URL will be used as the environment URL.
 
@@ -21,7 +21,7 @@ on:
       - main
 jobs:
   production:
-    name: Theme Check
+    name: Deploy to production
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
