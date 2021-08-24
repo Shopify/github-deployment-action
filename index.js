@@ -1,23 +1,22 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
 
-async function main() {
-  const ref = process.env.GITHUB_REF;
-  const sha = process.env.GITHUB_SHA;
-  const creator = process.env.ACTOR;
-  const token = core.getInput('token', { required: true });
-  const environment = core.getInput('environment', {
-    required: true,
-  });
-  const preview_url = core.getInput('preview_url');
-  const description = core.getInput('description');
-  const error = core.getInput('error');
+const { owner, repo } = github.context.repo;
+const ref = process.env.GITHUB_REF;
+const sha = process.env.GITHUB_SHA;
+const creator = process.env.ACTOR;
+const environment = core.getInput('environment', {
+  required: true,
+});
+const preview_url = core.getInput('preview_url');
+const description = core.getInput('description');
 
-  const octokit = github.getOctokit(token, {
-    previews: ['ant-man-preview', 'flash-preview'],
-  });
+const token = core.getInput('token', { required: true });
+const octokit = github.getOctokit(token, {
+  previews: ['ant-man-preview', 'flash-preview'],
+});
 
-  const { owner, repo } = github.context.repo;
+async function createDeployment() {
   const req = {
     owner,
     repo,
@@ -36,18 +35,39 @@ async function main() {
     },
   };
 
-  const resp = await octokit.rest.repos.createDeployment(req);
+  const response = await octokit.rest.repos.createDeployment(req);
 
-  if (resp.status >= 400) {
+  if (response.status >= 400) {
     throw new Error('Failed to create a new deployment');
   }
+
+  return response;
+}
+
+async function getJobURL() {
+  const res = await octokit.request(
+    'GET /repos/{owner}/{repo}/actions/runs/{run_id}/jobs',
+    {
+      owner,
+      repo,
+      run_id: process.env.GITHUB_RUN_ID,
+    },
+  );
+  const job = res.data.jobs.find(
+    (job) => job.name === process.env.GITHUB_JOB,
+  );
+  return job.html_url;
+}
+
+async function main() {
+  const response = await createDeployment();
 
   const isSuccessful = preview_url && preview_url.length > 0;
 
   const deploymentStatus = {
     repo,
     owner,
-    deployment_id: resp.data.id,
+    deployment_id: response.data.id,
   };
 
   if (isSuccessful) {
@@ -55,7 +75,7 @@ async function main() {
     deploymentStatus.environment_url = preview_url;
   } else {
     deploymentStatus.state = 'failure';
-    deploymentStatus.environment_url = `https://github.com/${process.env.GITHUB_REPOSITORY}/runs/${process.env.GITHUB_RUN_ID}?check_suite_focus=true`;
+    deploymentStatus.environment_url = await getJobURL();
   }
 
   await octokit.rest.repos.createDeploymentStatus(deploymentStatus);
