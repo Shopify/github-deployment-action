@@ -36,7 +36,21 @@ async function createDeployment() {
   return response;
 }
 
-async function getJobURL() {
+async function getFailureURL() {
+  // Since GITHUB_JOB = YAML's job.id,
+  // and since the API's job.id is the database's ID,
+  // and since the API's job.name === job.id IFF there's no job.name in the yaml file,
+  // It's possible that we can't get the URL for the actual job.
+  const job = await getJob();
+  if (job && job.html_url) return job.html_url
+
+  // When that happens, we fallback to the run's URL.
+  const run = await getRun();
+  if (run && run.html_url) return run.html_url
+  return undefined;
+}
+
+async function getJob() {
   const res = await octokit.request(
     'GET /repos/{owner}/{repo}/actions/runs/{run_id}/jobs',
     {
@@ -45,12 +59,21 @@ async function getJobURL() {
       run_id: process.env.GITHUB_RUN_ID,
     },
   );
-  const job = res.data.jobs.find(
-    (job) => job.name === process.env.GITHUB_JOB,
+  const { jobs } = res.data;
+  if (jobs.length === 1) return jobs[0];
+  return jobs.find((job) => job.name === process.env.GITHUB_JOB);
+}
+
+async function getRun() {
+  const res = await octokit.request(
+    'GET /repos/{owner}/{repo}/actions/runs/{run_id}',
+    {
+      owner,
+      repo,
+      run_id: process.env.GITHUB_RUN_ID,
+    },
   );
-  console.info(JSON.stringify(process.env, null, 2))
-  console.log(JSON.stringify(res.data.jobs, null, 2));
-  return job.html_url;
+  return res.data;
 }
 
 async function main() {
@@ -69,7 +92,7 @@ async function main() {
     deploymentStatus.environment_url = preview_url;
   } else {
     deploymentStatus.state = 'failure';
-    deploymentStatus.environment_url = await getJobURL();
+    deploymentStatus.environment_url = await getFailureURL();
   }
 
   await octokit.rest.repos.createDeploymentStatus(deploymentStatus);
