@@ -48,6 +48,8 @@ async function getJobURL() {
   const job = res.data.jobs.find(
     (job) => job.name === process.env.GITHUB_JOB,
   );
+  console.info(JSON.stringify(process.env, null, 2))
+  console.log(JSON.stringify(res.data.jobs, null, 2));
   return job.html_url;
 }
 
