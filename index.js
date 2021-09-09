@@ -85,7 +85,7 @@ async function main() {
     repo,
     owner,
     deployment_id: response.data.id,
-    auto_inactive: 'false',
+    auto_inactive: false,
   };
 
   if (isSuccessful) {
