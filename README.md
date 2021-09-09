@@ -54,3 +54,7 @@ The `shopify/github-deployment-action` accepts the following arguments:
 * `token` - (required) The contents of `${{ github.token }}` to allow the creation of GitHub deployments.
 * `description` - (optional) More information about the deployment.
 * `preview_url` - (optional) When absent, the deployment is assumed to be a failure and will link back to the GitHub workflow.
+
+## Releasing
+
+Please refer to [Releasing doc](https://github.com/Shopify/github-deployment-action/blob/main/RELEASING.md) for more details.
