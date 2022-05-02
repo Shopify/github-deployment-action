@@ -58,3 +58,4 @@ The `shopify/github-deployment-action` accepts the following arguments:
 ## Releasing
 
 Please refer to [Releasing doc](https://github.com/Shopify/github-deployment-action/blob/main/RELEASING.md) for more details.
+
