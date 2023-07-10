@@ -12,9 +12,7 @@ const preview_url = core.getInput('preview_url');
 const description = core.getInput('description');
 
 const token = core.getInput('token', { required: true });
-const octokit = github.getOctokit(token, {
-  previews: ['ant-man-preview', 'flash-preview'],
-});
+const octokit = github.getOctokit(token);
 
 async function createDeployment() {
   const req = {
@@ -37,43 +35,8 @@ async function createDeployment() {
 }
 
 async function getFailureURL() {
-  // Since GITHUB_JOB = YAML's job.id,
-  // and since the API's job.id is the database's ID,
-  // and since the API's job.name === job.id IFF there's no job.name in the yaml file,
-  // It's possible that we can't get the URL for the actual job.
-  const job = await getJob();
-  if (job && job.html_url) return job.html_url
-
-  // When that happens, we fallback to the run's URL.
-  const run = await getRun();
-  if (run && run.html_url) return run.html_url
-  return undefined;
-}
-
-async function getJob() {
-  const res = await octokit.request(
-    'GET /repos/{owner}/{repo}/actions/runs/{run_id}/jobs',
-    {
-      owner,
-      repo,
-      run_id: process.env.GITHUB_RUN_ID,
-    },
-  );
-  const { jobs } = res.data;
-  if (jobs.length === 1) return jobs[0];
-  return jobs.find((job) => job.name === process.env.GITHUB_JOB);
-}
-
-async function getRun() {
-  const res = await octokit.request(
-    'GET /repos/{owner}/{repo}/actions/runs/{run_id}',
-    {
-      owner,
-      repo,
-      run_id: process.env.GITHUB_RUN_ID,
-    },
-  );
-  return res.data;
+  const {repo: {owner, repo}, serverUrl, runId} = github.context;
+  return `${serverUrl}/${owner}/${repo}/actions/runs/${runId}`
 }
 
 async function main() {
@@ -94,12 +57,24 @@ async function main() {
   } else {
     deploymentStatus.state = 'failure';
     deploymentStatus.environment_url = await getFailureURL();
+    if (!process.env.WORKFLOW_CI) {
+      core.setFailed("Deployment failed");
+    }
   }
 
   await octokit.rest.repos.createDeploymentStatus(deploymentStatus);
+
+  return deploymentStatus.state;
 }
 
-main().catch(function (error) {
+main().then((result) => {
+  if (process.env.WORKFLOW_CI) {
+    const expected = process.env.EXPECTED_RESULT
+    if (result != expected) {
+      core.setFailed(`Expected ${expected} but got ${result}`);
+    }
+  }
+}).catch(function (error) {
   core.setFailed(error.message);
   process.exit(1);
 });

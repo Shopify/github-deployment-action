@@ -11,6 +11,9 @@ jobs:
       - name: Create GitHub Deployment
         id: github-deployment-action
         uses: ./
+        env:
+          WORKFLOW_CI: true
+          EXPECTED_RESULT: 'failure'
         with:
           token: ${{ github.token }}
           environment: 'preview'
@@ -25,9 +28,12 @@ jobs:
       - uses: actions/checkout@v2
       - name: Fake Successful Deploy
         id: deploy
-        run: echo "::set-output name=preview_url::https://shopify.dev/hydrogen"
+        run: echo "preview_url=https://shopify.dev/hydrogen" >> "$GITHUB_OUTPUT"
       - name: Create GitHub Deployment
         id: github-deployment-action
+        env:
+          WORKFLOW_CI: true
+          EXPECTED_RESULT: 'success'
         uses: ./
         with:
           token: ${{ github.token }}
