@@ -70,7 +70,7 @@ async function main() {
 main().then((result) => {
   if (process.env.WORKFLOW_CI) {
     const expected = process.env.EXPECTED_RESULT
-    if (result != expected) {
+    if (result !== expected) {
       core.setFailed(`Expected ${expected} but got ${result}`);
     }
   }
