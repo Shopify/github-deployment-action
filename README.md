@@ -31,7 +31,7 @@ jobs:
         id: deploy
         run: |
           export PREVIEW_URL=https://shopify.dev/hydrogen
-          echo "::set-output name=preview_url::$PREVIEW_URL"
+          echo "preview_url=$PREVIEW_URL >> $GITHUB_OUTPUT"
 
       - name: Create GitHub Deployment
         uses: shopify/github-deployment-action@v1
