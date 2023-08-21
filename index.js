@@ -3,8 +3,6 @@ const github = require('@actions/github');
 
 const { owner, repo } = github.context.repo;
 const ref = process.env.GITHUB_REF;
-const sha = process.env.GITHUB_SHA;
-const creator = process.env.ACTOR;
 const environment = core.getInput('environment', {
   required: true,
 });
