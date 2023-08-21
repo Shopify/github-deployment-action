@@ -55,9 +55,6 @@ async function main() {
   } else {
     deploymentStatus.state = 'failure';
     deploymentStatus.environment_url = await getFailureURL();
-    if (!process.env.WORKFLOW_CI) {
-      core.setFailed("Deployment to Oxygen failed. Check the 'Build and Publish to Oxygen' step for more information.");
-    }
   }
 
   await octokit.rest.repos.createDeploymentStatus(deploymentStatus);
