@@ -4,7 +4,7 @@ jobs:
   error:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Fake Errored Deploy
         id: deploy
         run: echo "ERROR!!" 1>&2
@@ -25,7 +25,7 @@ jobs:
     needs: [error]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Fake Successful Deploy
         id: deploy
         run: echo "preview_url=https://shopify.dev/hydrogen" >> "$GITHUB_OUTPUT"

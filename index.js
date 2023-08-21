@@ -3,8 +3,6 @@ const github = require('@actions/github');
 
 const { owner, repo } = github.context.repo;
 const ref = process.env.GITHUB_REF;
-const sha = process.env.GITHUB_SHA;
-const creator = process.env.ACTOR;
 const environment = core.getInput('environment', {
   required: true,
 });
@@ -57,9 +55,6 @@ async function main() {
   } else {
     deploymentStatus.state = 'failure';
     deploymentStatus.environment_url = await getFailureURL();
-    if (!process.env.WORKFLOW_CI) {
-      core.setFailed("Deployment to Oxygen failed. Check the 'Build and Publish to Oxygen' step for more information.");
-    }
   }
 
   await octokit.rest.repos.createDeploymentStatus(deploymentStatus);
