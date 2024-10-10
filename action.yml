@@ -3,7 +3,6 @@ branding:
   icon: shopping-bag
   colour: green
 description: 'Sends a request to GitHub in order to track deployment'
-deprecationMessage: 'This action is now deprecated. See https://github.com/Shopify/github-deployment-action?tab=readme-ov-file#deprecation-notice for more information.'
 inputs:
   environment:
     description: 'Deployment environment'
