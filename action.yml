@@ -6,6 +6,7 @@ description: 'Sends a request to GitHub in order to track deployment'
 inputs:
   environment:
     description: 'Deployment environment'
+    deprecationMessage: 'This action is now deprecated. See https://github.com/Shopify/github-deployment-action?tab=readme-ov-file#deprecation-notice for more information.'
     required: true
   preview_url:
     description: 'Preview URL'
